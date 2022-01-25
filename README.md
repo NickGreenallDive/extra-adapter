@@ -2,6 +2,8 @@
 
 This is a really simple package which contains a `LoggerAdapter` class. This
 class packages additional keyword arguments into the `extra` dictionary.
+Additionally, a convenience method to create a logger instance, as well as formatters
+that can output the logger keyword arguments are provided.
 
 ## Install
 
@@ -34,28 +36,41 @@ root_logger.info("This is a message with misc info", extra={"misc": "Misc"})
 The corresponding `LogRecord` object gets an attribute called `misc`, which can
 be used by formatters and handlers.
 
-### JSON logging
+### Convenience method
 
-This can be utalized to form structured logging using custom handler or
-formatters. The most common case is a desire for a JSON logger, for this I
-recommend the [python-json-logger package](https://github.com/madzak/python-json-logger).
+A basic logger configuration can be applied by using the `get_logger` function, that
+will return an instance of `ExtraAdapter` that wraps a logging.Logger instance:
 
-Using with this addapter:
-```
+```python
 import logging
-from extra_adapter import ExtraAdapter
-from pythonjsonlogger import jsonlogger
+import sys
+from extra_adapter import get_logger
 
-root_logger = logging.getLogger()
-
-logHandler = logging.StreamHandler()
-formatter = jsonlogger.JsonFormatter()
-logHandler.setFormatter(formatter)
-root_logger.addHandler(logHandler)
-
-adapter = ExtraAdapter(root_logger, {}) # extra is no longer required here
+handler = logging.StreamHandler(sys.stdout)
+logger = get_logger(name="example", level=logging.INFO, handlers=[handler])
+adapter.info("This is a message")
+adapter.info("This is a message with misc info", misc="Misc")
 ```
-Any keywords you pass to your adapter will be propagated to your JSON messages
+
+### Formatters
+
+The adapter can be used with any formatter, but the package provides two useful formatters:
+- **StringFormatter**: Renders a log with keyword arguments in an easily human-readable string format.
+- **JSONFormatter**: Renders a log with keyword arguments in JSON format.
+
+Besides the message and keyword arguments, the log output will render a few default log keys.
+Usage:
+```python
+import logging
+import sys
+from extra_adapter import StringFormatter, get_logger
+
+handler = logging.StreamHandler(sys.stdout)
+handler.setFormatter(StringFormatter())
+logger = get_logger(name="example", level=logging.INFO, handlers=[handler])
+adapter.info("This is a message")
+adapter.info("This is a message with misc info", misc="Misc")
+```
 
 ## Further Information
 
