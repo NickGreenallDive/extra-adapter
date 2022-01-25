@@ -1,4 +1,6 @@
+from copy import deepcopy
 from logging import LoggerAdapter
+from typing import Any, MutableMapping
 
 
 class ExtraAdapter(LoggerAdapter):
@@ -24,13 +26,12 @@ class ExtraAdapter(LoggerAdapter):
         "stacklevel",
     }
 
-    def process(self, msg: str, kwargs: dict):
+    def process(self, msg: str, kwargs: MutableMapping[str, Any]):
         new_kwargs = {}
-        new_kwargs["extra"] = self.extra if self.extra is not None else {}
-        for k, v in kwargs.items():
-            if k in self.PROPAGATE_KWARGS:
-                new_kwargs[k] = v
+        new_kwargs["extra"] = deepcopy(self.extra) if self.extra is not None else {}
+        for key, value in kwargs.items():
+            if key in self.PROPAGATE_KWARGS:
+                new_kwargs[key] = value
             else:
-                new_kwargs["extra"][k] = v
+                new_kwargs["extra"][key] = value  # type: ignore
         return msg, new_kwargs
-
