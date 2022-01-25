@@ -4,7 +4,7 @@ from logging import LoggerAdapter
 class ExtraAdapter(LoggerAdapter):
     """
     A LoggerAdapter for passing `extra` information to stdlib logging.
-    
+
     This wraps a stdlib logger and folds keywords passed as extra data. This can
     then be used by the handlers and formatters, by parsing the attributes of the 
     LogRecord.
@@ -19,17 +19,18 @@ class ExtraAdapter(LoggerAdapter):
     """
 
     PROPAGATE_KWARGS = {
-        "exc_info", "stack_info", "stacklevel",
+        "exc_info",
+        "stack_info",
+        "stacklevel",
     }
 
-    def process(self, msg, kwargs):
+    def process(self, msg: str, kwargs: dict):
         new_kwargs = {}
         new_kwargs["extra"] = self.extra if self.extra is not None else {}
-        for k,v in kwargs.items():
+        for k, v in kwargs.items():
             if k in self.PROPAGATE_KWARGS:
                 new_kwargs[k] = v
             else:
                 new_kwargs["extra"][k] = v
         return msg, new_kwargs
-
 
